@@ -1,0 +1,89 @@
+#!/bin/bash
+
+##############################################################################
+# FILE: (bash script) python_for_pyinstaller
+# AUTHOR: R-Logik, Deutschland. https://github.com/RLogik/phpytex
+# CREATED: 28.07.2020
+# DESCRIPTION:
+#   A script python_for_pyinstaller for the execution of an acceptable
+#   version of python for PyInstaller.
+# LAST CHANGED: 28.07.2020
+# VERSION: 1·0·0
+# NOTES:
+#
+#     Installation:
+#     ~~~~~~~~~~~~~
+#     1. modify the first 2 lines of this script if necessary.
+#     2. place this in a folder, which is in the PATH variable (or extend this)
+#     3. you may need to run
+#            dos2unix <name of this script>
+#        beforehand. Then run
+#            sudo chmod +x <name of this script>
+#        in bash. The command is now available everywhere on your system.
+#     4. call
+#            <name of this script> --info
+#        for more information.
+#
+#     Setup:
+#     ~~~~~~~~~~~~~
+#     - search for the line
+#            pythonPath=....
+#     and replace this by a path to a 'suitable version' of python.
+#     (Currently, this must be  3.0.0 — 3.6.x.)
+#
+##############################################################################
+
+
+#################################################
+##                                             ##
+pythonPath="$(which python3)";
+## ^^^^ place your version of python here ^^^^ ##
+#################################################
+min_version="3.0.0";
+max_version="3.6.x";
+version_regex="3\.[0-6]\.[[:digit:]]";
+
+ARGS="$@";
+
+if [[ $(echo "$ARGS" | grep -i -E "^[[:space:]]*\-+(path|which)[[:space:]]*$") ]]; then
+    echo "$pythonPath";
+    exit 0;
+fi
+
+is_error="false";
+show_info="false";
+version="$($pythonPath -V 2>&1)";
+
+if ! [[ $(echo "$version" | grep -i -E "^.*python[[:space:]]+$version_regex.*$") ]]; then
+    is_error="true";
+    show_info="true";
+fi
+
+if [[ $(echo "$ARGS" | grep -i -E "^[[:space:]]*\-+(info|help)[[:space:]]*$") ]]; then
+    show_info="true";
+fi
+
+if [[ "$show_info" == "true" ]]; then
+    echo -e "";
+    echo -e "You are currently using \033[1m$version\033[0m";
+    echo -e "";
+    echo -e "Note that \033[1;96mPyInstaller\033[0m is incompatible with higher versions.";
+    echo -e "Please ensure that the \033[1mpath to a python\033[0m in this script is between \033[92m$min_version\033[0m and \033[92m$max_version\033[0m.";
+    echo -e "If you have installed this for the first time, you will need to run";
+    echo -e "";
+    echo -e "    \033[1mpython_for_pyinstaller -m pip install --upgrade pip\033[0m";
+    echo -e "    \033[1mpython_for_pyinstaller -m pip install --upgrade PyInstaller\033[0m";
+    echo -e "    \033[1mpython_for_pyinstaller -m pip install --upgrade pyinstaller_setuptools\033[0m";
+    # echo -e "    \033[1mpython_for_pyinstaller -m pip install --upgrade setuptools\033[0m"
+    # echo -e "    \033[1mpython_for_pyinstaller -m pip install --upgrade Distutils\033[0m"
+    echo -e "";
+    echo -e "To use pyinstaller, follow the instructions in \033[4;35mhttps://pypi.org/project/pyinstaller-setuptools/\033[0m.";
+    echo -e "Note especially the order (build, install, pyinstall) when using PyInstaller.";
+    echo -e ""
+    if [[ "$is_error" == "true" ]]; then
+        exit 1;
+    fi
+    exit 0;
+fi
+
+$pythonPath $ARGS;
