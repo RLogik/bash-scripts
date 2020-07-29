@@ -63,6 +63,8 @@ NAMEOFAPP="$(get_kwarg "$SCRIPTARGS" "app-name" "")";
 SETUPFILE="$(get_kwarg "$SCRIPTARGS" "setup-file" "")";
 ICONIMAGE="$(get_kwarg "$SCRIPTARGS" "icon" "")";
 PYTHONPATH="$(get_kwarg "$SCRIPTARGS" "python-path" "")";
+ADDDATA="$(get_kwarg "$SCRIPTARGS" "add-data" "")";
+SPECPATH="$(get_kwarg "$SCRIPTARGS" "spec-path" "logs")";
 
 if [[ "$NAMEOFAPP" == "" ]]; then
     echo -e "\033[1;91mERROR\033[0m! Need \033[1mapp-name\033[0m argument.";
@@ -118,11 +120,7 @@ echo -e "  \033[4;34m2. Install:\033[0m";
 python3 $SETUPFILE install
 echo -e "";
 echo -e "  \033[4;34m3. Create executable:\033[0m";
-if [[ "$ICONIMAGE" == "" ]]; then
-    python3 $SETUPFILE pyinstaller -- --paths "$paths" --specpath=logs --onefile --name="$NAMEOFAPP"
-else
-    python3 $SETUPFILE pyinstaller -- --paths "$paths" --specpath=logs --onefile --name="$NAMEOFAPP" --icon="$ICONIMAGE"
-fi
+python3 $SETUPFILE pyinstaller -- --paths "$paths" --onefile --name="$NAMEOFAPP" --icon="$ICONIMAGE" --specpath="$SPECPATH" --add-data $ADDDATA
 
 ################################################################
 # GARBAGE ENTFERNUNG
