@@ -158,7 +158,7 @@ echo -e "  \033[4;34m2. Install:\033[0m";
 python3 $SETUPFILE install
 echo -e "";
 echo -e "  \033[4;34m3. Create executable:\033[0m";
-python3 -m PyInstaller $SETUPFILE \
+python3 $SETUPFILE pyinstaller -- \
     --onefile \
     --paths "$paths" \
     --name="$NAMEOFAPP" \
