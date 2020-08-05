@@ -1,15 +1,17 @@
 #! /bin/bash
 
 ##############################################################################
-# FILE: (bash script) compile_pytinstaller
-# AUTHOR: R-Logik, Deutschland. https://github.com/RLogik/bash-scripts
+# FILE: (bash script) compile_pyinstaller
+# AUTHOR: R-Logik, Deutschland. https://github.com/RLogik/phpytex
 # CREATED: 28.07.2020
-# LAST CHANGED: 30.07.2020
-# VERSION: 1·0·1
+# LAST CHANGED: 05.08.2020
+# VERSION: 1·1·0
 # DESCRIPTION:
 #    A script which allows simple, reliable compilation of a python project
 #    via the pyinstaller compiler. It deals with all the versioning pitfalls
 #    by creating a virtual python environment and working locally with this.
+#
+#    Based on https://github.com/RLogik/bash-scripts > compile_pyinstaller
 # NOTES:
 #
 #    Installation:
@@ -25,22 +27,26 @@
 #    Usage:
 #    ~~~~~~~~~~~~~
 #
-#    compile_pytinstaller
-#        [required] python-path=<path to suitable python distribution>
-#        [required] app-name=<desired name of programme>
-#        [required] setup-file=<name of python setup file>
-#        [optional] --icon=<relative location of a .ico file>
-#        [optional] --specpath=<path where .spec will be placed>
+#    ./compile.sh
+#        [optional] --setup-venv            (build process) whether to set up python venv
+#        [optional] --install-requirements  (build process) whether to install pip, pyinstaller requirements
+#        [required] --python-path=<path>    path to suitable python distribution
+#        [required] --app-name=<str>        desired name of programme
+#        [required] --setup-file=<file>     name of python setup file
+#        [optional] --icon=<file>           relative location of a .ico file
+#        [optional] --specpath=<path>       path where .spec will be placed
 #            DEFAULT = .
 #        [optional, multiple]
 #                   --add-data <path1:path2>
 #                   --add-data <path1:path2>
 #                   ...
 #                   --add-data <path1:path2>
-#            path1 relative to specpath
-#            path2 relative to build folder
+#                   ...
+#            where in each case
+#                path1 is relative to specpath
+#                path2 is relative to build folder
 #
-#    - you can/should use "$(python_for_pyinstaller --which)" for the pytho-path argument.
+#    - you can/should use "$(python_for_pyinstaller --which)" for the python-path argument.
 #    - In your setup file use pyinstaller_setuptools.
 #    Consult https://pypi.org/project/pyinstaller-setuptools/
 #
@@ -97,12 +103,14 @@ function has_arg() {
 }
 ################################################################
 
-PYTHONPATH="$(get_kwarg "$SCRIPTARGS" "python-path" "")";
-NAMEOFAPP="$(get_kwarg "$SCRIPTARGS" "app-name" "")";
-SETUPFILE="$(get_kwarg "$SCRIPTARGS" "setup-file" "")";
-ICONIMAGE="$(get_kwarg "$SCRIPTARGS" "--icon" "")";
-SPECPATH="$(get_kwarg "$SCRIPTARGS" "--specpath" ".")";
-ADDDATA="$(get_all_kwargs "$SCRIPTARGS" "--add-data " "--add-data " false)";
+PYTHONPATH="$(get_kwarg "$SCRIPTARGS" "-*python-path" "")";
+NAMEOFAPP="$(get_kwarg "$SCRIPTARGS" "-*app-name" "")";
+SETUPFILE="$(get_kwarg "$SCRIPTARGS" "-*setup-file" "")";
+ICONIMAGE="$(get_kwarg "$SCRIPTARGS" "-+icon" "")";
+SPECPATH="$(get_kwarg "$SCRIPTARGS" "-+specpath" ".")";
+ADDDATA="$(get_all_kwargs "$SCRIPTARGS" "-+add-data " "--add-data " false)";
+SETUPVENV="$(has_arg "$SCRIPTARGS" "-+setup-venv")";
+INSTALLREQUIREMENTS="$(has_arg "$SCRIPTARGS" "-+install-requirements")";
 
 if [[ "$PYTHONPATH" == "" ]]; then
     echo -e "\033[1;91mERROR\033[0m! Need \033[1mpython-path\033[0m argument.";
@@ -122,6 +130,7 @@ fi
 ################################################################
 # ACTIVATE venv:
 ################################################################
+if [ $SETUPVENV ]; then
 echo -e "";
 echo -e "\033[1;4;32mPrelimenaries:\033[0m";
 echo -e "";
@@ -134,15 +143,18 @@ vpython_path="$(which python3)";
 echo -e "  Path to python3: \033[1;96m$vpython_path\033[0m.";
 echo -e "  Version used:    \033[1;92m$(python3 -V 2>&1)\033[0m.";
 echo -e "";
+fi
 
 ################################################################
 # INSTALL REQUIREMENTS:
 ################################################################
+if [ $INSTALLREQUIREMENTS ]; then
 echo -e "\033[1;4;32mInstalling any missing python dependencies:\033[0m";
-python3 -m pip install --upgrade pip
-python3 -m pip install PyInstaller
-python3 -m pip install pyinstaller_setuptools
+python3 -m pip install --upgrade pip;
+python3 -m pip install PyInstaller==3.6;
+python3 -m pip install pyinstaller_setuptools==2019.3;
 echo -e "";
+fi
 
 ################################################################
 # COMPILE PROJECT:
@@ -171,8 +183,7 @@ python3 $SETUPFILE pyinstaller -- \
 ################################################################
 echo -e "";
 echo -e "\033[1;4;32mGarbage collection:\033[0m";
-ls . | grep -E "^.*.egg.info$" | awk '{print "./"$1}' | xargs rm -r; # removes all .egg.info folders and subfolders recursively.
-ls dist | grep -E "^.*(.egg|_entry.py|__pycache__)$" | awk '{print "dist/"$1}' | xargs rm -r; # remove everything but the app from dist.
+ls dist | grep -E "^(.*.egg|__pycache__)$" | awk '{print "dist/"$1}' | xargs rm -r; # remove everything but the app from dist.
 
 echo -e "";
 echo -e "\033[1;32mFinished!\033[0m";
