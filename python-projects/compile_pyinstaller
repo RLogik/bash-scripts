@@ -5,7 +5,7 @@
 # AUTHOR: R-Logik, Deutschland. https://github.com/RLogik/phpytex
 # CREATED: 28.07.2020
 # LAST CHANGED: 05.08.2020
-# VERSION: 1·1·0
+# VERSION: 1·1·1
 # DESCRIPTION:
 #    A script which allows simple, reliable compilation of a python project
 #    via the pyinstaller compiler. It deals with all the versioning pitfalls
@@ -130,12 +130,16 @@ fi
 ################################################################
 # ACTIVATE venv:
 ################################################################
-if [ $SETUPVENV ]; then
 echo -e "";
 echo -e "\033[1;4;32mPrelimenaries:\033[0m";
 echo -e "";
 echo -e "  \033[4;34m1. Create Virtual Python Environment:\033[0m";
-$($PYTHONPATH -m venv env);
+if [ $SETUPVENV ]; then
+    $($PYTHONPATH -m venv env);
+else
+    echo -e "";
+    echo -e "  \033[2;3mSkipping...\033[0m"
+fi
 echo -e "";
 echo -e "  \033[4;34m2. Switch To Virtual Python Environment:\033[0m";
 source env/bin/activate;
@@ -143,18 +147,20 @@ vpython_path="$(which python3)";
 echo -e "  Path to python3: \033[1;96m$vpython_path\033[0m.";
 echo -e "  Version used:    \033[1;92m$(python3 -V 2>&1)\033[0m.";
 echo -e "";
-fi
 
 ################################################################
 # INSTALL REQUIREMENTS:
 ################################################################
-if [ $INSTALLREQUIREMENTS ]; then
 echo -e "\033[1;4;32mInstalling any missing python dependencies:\033[0m";
-python3 -m pip install --upgrade pip;
-python3 -m pip install PyInstaller==3.6;
-python3 -m pip install pyinstaller_setuptools==2019.3;
-echo -e "";
+if [ $INSTALLREQUIREMENTS ]; then
+    python3 -m pip install --upgrade pip;
+    python3 -m pip install PyInstaller==3.6;
+    python3 -m pip install pyinstaller_setuptools==2019.3;
+else
+    echo -e "";
+    echo -e "  \033[2;3mSkipping...\033[0m"
 fi
+echo -e "";
 
 ################################################################
 # COMPILE PROJECT:
