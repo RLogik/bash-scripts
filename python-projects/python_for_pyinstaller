@@ -68,7 +68,7 @@ if [[ "$show_info" == "true" ]]; then
     echo -e "You are currently using \033[1m$version\033[0m";
     echo -e "";
     echo -e "Note that \033[1;96mPyInstaller\033[0m is incompatible with higher versions.";
-    echo -e "Please ensure that the \033[1mpath to a python\033[0m in this script is between \033[92m$min_version\033[0m and \033[92m$max_version\033[0m.";
+    echo -e "Please ensure that the \033[1mpath to python\033[0m in this script is between \033[92m$min_version\033[0m and \033[92m$max_version\033[0m.";
     echo -e "If you have installed this for the first time, you will need to run";
     echo -e "";
     echo -e "    \033[1mpython_for_pyinstaller -m pip install --upgrade pip\033[0m";
